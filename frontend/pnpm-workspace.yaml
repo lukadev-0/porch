@@ -1,0 +1,4 @@
+engineStrict: true
+allowBuilds:
+  esbuild: true
+  vue-demi: set this to true or false

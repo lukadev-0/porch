@@ -1,0 +1,21 @@
+[package]
+name = "porch"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+aide = { version = "0.15.1", features = ["axum", "axum-json"] }
+anyhow = "1.0.104"
+axum = { version = "0.8.9", features = ["macros"] }
+base64 = "0.23.1"
+bytes = "1.12.1"
+getrandom = "0.4.3"
+rust-embed = { version = "8.14.0", features = ["mime-guess"] }
+schemars = { version = "0.9.0", features = ["uuid1"] }
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.154"
+thiserror = "2.0.21"
+tokio = { version = "1.54.1", features = ["full"] }
+tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
+uuid = { version = "1.29.2", features = ["serde", "v7"] }
+webauthn-rs = "0.6.2"
