@@ -51,6 +51,10 @@ impl UserStorage for MemoryStorage {
         Ok(())
     }
 
+    async fn get_users(&mut self) -> StorageResult<Vec<User>> {
+        Ok(self.read().users.values().cloned().collect())
+    }
+
     async fn get_user_by_id(&mut self, id: UserId) -> StorageResult<User> {
         self.read()
             .users

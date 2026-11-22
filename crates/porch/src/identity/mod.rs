@@ -27,6 +27,7 @@ pub struct User {
 
 pub trait UserStorage: Storage {
     fn create_user(&mut self, user: &User) -> impl Future<Output = StorageResult<()>> + Send;
+    fn get_users(&mut self) -> impl Future<Output = StorageResult<Vec<User>>> + Send;
     fn get_user_by_id(&mut self, id: UserId) -> impl Future<Output = StorageResult<User>> + Send;
     fn get_user_by_name(&mut self, name: &str) -> impl Future<Output = StorageResult<User>> + Send;
 }

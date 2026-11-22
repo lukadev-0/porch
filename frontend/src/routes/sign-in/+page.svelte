@@ -17,12 +17,15 @@
     event.preventDefault();
 
     if (pending) return;
-    pending = true;
-    usernameError = undefined;
-    authError = undefined;
 
     const formData = new FormData(event.currentTarget);
     const username = formData.get("username")?.toString() ?? "";
+
+    const transition = withViewTransition(() => {
+      pending = true;
+      usernameError = undefined;
+      authError = undefined;
+    });
 
     const {
       data: authentication,
@@ -33,6 +36,8 @@
         username,
       },
     });
+
+    await transition;
 
     if (response?.status === 404)
       return withViewTransition(() => {
@@ -194,7 +199,7 @@
       border: none;
       color: var(--color-text-secondary);
       &:hover {
-        color: var(--color-primary);
+        color: var(--color-on-primary-container);
       }
     }
 

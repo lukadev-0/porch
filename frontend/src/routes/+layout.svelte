@@ -2,10 +2,7 @@
   import "../styles/globals.css";
   import "#lib/client-config.ts";
 
-  import favicon from "#lib/assets/favicon.svg";
-  import type { LayoutProps } from "./$types";
-
-  let { children, data }: LayoutProps = $props();
+  let { children, data } = $props();
 
   $effect(() => {
     document.documentElement.style.setProperty(

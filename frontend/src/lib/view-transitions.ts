@@ -7,7 +7,7 @@ export async function withViewTransition(fn: () => void | Promise<void>) {
       await tick();
     });
     await transition.finished;
+  } else {
+    await fn();
   }
-
-  await fn();
 }

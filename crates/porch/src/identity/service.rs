@@ -38,6 +38,18 @@ impl IdentityService {
         Ok(user)
     }
 
+    pub async fn get_users(
+        &self,
+        storage: &mut impl UserStorage,
+        actor: &Actor,
+    ) -> ServiceResult<Vec<User>> {
+        actor.must_be_admin()?;
+        Ok(storage
+            .get_users()
+            .await
+            .context("could not get users from storage")?)
+    }
+
     pub async fn get_user_by_id(
         &self,
         storage: &mut impl UserStorage,

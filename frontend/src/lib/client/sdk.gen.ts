@@ -2,7 +2,7 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { CreateUserData, CreateUserErrors, CreateUserResponses, FinishPasskeyAuthenticationData, FinishPasskeyAuthenticationErrors, FinishPasskeyAuthenticationResponses, FinishPasskeyRegistrationData, FinishPasskeyRegistrationErrors, FinishPasskeyRegistrationResponses, GetOpenapiJsonData, GetUserByIdData, GetUserByIdErrors, GetUserByIdResponses, GetUserPasskeysData, GetUserPasskeysErrors, GetUserPasskeysResponses, SignOutData, SignOutErrors, SignOutResponses, StartPasskeyAuthenticationData, StartPasskeyAuthenticationErrors, StartPasskeyAuthenticationResponses, StartPasskeyRegistrationData, StartPasskeyRegistrationErrors, StartPasskeyRegistrationResponses } from './types.gen';
+import type { CreateUserData, CreateUserErrors, CreateUserResponses, FinishPasskeyAuthenticationData, FinishPasskeyAuthenticationErrors, FinishPasskeyAuthenticationResponses, FinishPasskeyRegistrationData, FinishPasskeyRegistrationErrors, FinishPasskeyRegistrationResponses, GetOpenapiJsonData, GetUserByIdData, GetUserByIdErrors, GetUserByIdResponses, GetUserPasskeysData, GetUserPasskeysErrors, GetUserPasskeysResponses, GetUsersData, GetUsersErrors, GetUsersResponses, SignOutData, SignOutErrors, SignOutResponses, StartPasskeyAuthenticationData, StartPasskeyAuthenticationErrors, StartPasskeyAuthenticationResponses, StartPasskeyRegistrationData, StartPasskeyRegistrationErrors, StartPasskeyRegistrationResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -17,6 +17,11 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
      */
     meta?: keyof ClientMeta extends never ? Record<string, unknown> : ClientMeta;
 };
+
+/**
+ * Get users
+ */
+export const getUsers = <ThrowOnError extends boolean = false>(options?: Options<GetUsersData, ThrowOnError>): RequestResult<GetUsersResponses, GetUsersErrors, ThrowOnError> => (options?.client ?? client).get<GetUsersResponses, GetUsersErrors, ThrowOnError>({ url: '/api/users', ...options });
 
 /**
  * Create user

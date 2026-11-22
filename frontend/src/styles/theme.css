@@ -14,6 +14,8 @@
   --color-primary: hsl(var(--accent-hue) 80% 70%);
   --color-primary-ring: hsl(var(--accent-hue) 80% 70% / 0.25);
   --color-on-primary: hsl(var(--accent-hue) 100% 10%);
+  --color-primary-container: hsl(var(--accent-hue) 40% 18%);
+  --color-on-primary-container: hsl(var(--accent-hue) 100% 85%);
 
   --color-danger: hsl(0deg 90% 63%);
   --color-on-danger: hsl(0deg 100% 10%);
@@ -33,6 +35,8 @@
   --font-sm-line-height: 1.5;
   --font-lg-size: 1.25rem;
   --font-lg-line-height: 1.2;
+  --font-xl-size: 1.75rem;
+  --font-xl-line-height: 1.2;
 
   --field-background-color: var(--color-surface-secondary);
   --field-outline-color: var(--color-outline);

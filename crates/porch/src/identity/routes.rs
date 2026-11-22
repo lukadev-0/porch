@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use aide::axum::ApiRouter;
-use aide::axum::routing::{get_with, post_with};
+use aide::axum::routing::get_with;
 use aide::transform::TransformOperation;
 use axum::extract::{FromRef, Path, State};
 use axum::{Extension, Json};
@@ -20,7 +20,10 @@ where
     Arc<IdentityService>: FromRef<S>,
 {
     ApiRouter::new()
-        .api_route("/users", post_with(create_user, create_user_docs))
+        .api_route(
+            "/users",
+            get_with(get_users, get_users_docs).post_with(create_user, create_user_docs),
+        )
         .api_route(
             "/users/{user_id}",
             get_with(get_user_by_id, get_user_by_id_docs),
@@ -40,6 +43,19 @@ async fn create_user(
 
 fn create_user_docs(op: TransformOperation) -> TransformOperation {
     op.id("createUser").summary("Create user")
+}
+
+async fn get_users(
+    State(mut storage): State<AppStorage>,
+    State(identity): State<Arc<IdentityService>>,
+    Extension(actor): Extension<Arc<Actor>>,
+) -> ApiResult<Json<Vec<User>>> {
+    let users = identity.get_users(&mut storage, &actor).await?;
+    Ok(Json(users))
+}
+
+fn get_users_docs(op: TransformOperation) -> TransformOperation {
+    op.id("getUsers").summary("Get users")
 }
 
 #[derive(Deserialize, JsonSchema)]

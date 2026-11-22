@@ -62,6 +62,7 @@
       position: relative;
       color: var(--_text-color);
       height: 2.25rem;
+      padding-inline: 0.75rem;
       font-size: var(--font-sm-size);
       line-height: var(--font-sm-line-height);
       font-weight: 600;

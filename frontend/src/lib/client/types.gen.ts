@@ -98,6 +98,27 @@ export type UserPasskey = {
  */
 export type UserTarget = string | 'me';
 
+export type GetUsersData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/users';
+};
+
+export type GetUsersErrors = {
+    401: ApiErrorResponse;
+    403: ApiErrorResponse;
+    500: ApiErrorResponse;
+};
+
+export type GetUsersError = GetUsersErrors[keyof GetUsersErrors];
+
+export type GetUsersResponses = {
+    200: Array<User>;
+};
+
+export type GetUsersResponse = GetUsersResponses[keyof GetUsersResponses];
+
 export type CreateUserData = {
     body: CreateUser;
     path?: never;

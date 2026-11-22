@@ -1,7 +1,7 @@
-import type { PageLoad } from "./$types";
 import { getUserById } from "#lib/client/sdk.gen.ts";
+import type { LayoutLoad } from "./$types";
 
-export const load: PageLoad = async () => {
+export const load: LayoutLoad = async () => {
   const { data: user } = await getUserById({
     path: {
       user_id: "me",
