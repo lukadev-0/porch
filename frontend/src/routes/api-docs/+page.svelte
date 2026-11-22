@@ -18,9 +18,3 @@
 </script>
 
 <div {@attach apiReference}></div>
-
-<style>
-  :global(body) {
-    margin: 0;
-  }
-</style>

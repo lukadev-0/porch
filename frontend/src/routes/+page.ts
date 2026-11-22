@@ -6,6 +6,7 @@ export const load: PageLoad = async () => {
     path: {
       user_id: "me",
     },
+    throwOnError: true,
   });
 
   return {

@@ -3,7 +3,6 @@
   import { refreshAll } from "$app/navigation";
   import type { EventHandler } from "svelte/elements";
   import type { PageProps } from "./$types";
-  import { enhance } from "$app/forms";
 
   const { data }: PageProps = $props();
 

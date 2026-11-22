@@ -1,0 +1,63 @@
+:root {
+  --color-base: hsl(0deg 0% 4%);
+  --color-surface: hsl(0deg 0% 9%);
+  --color-surface-secondary: hsl(0deg 0% 12%);
+  --color-surface-tertiary: hsl(0deg 0% 13%);
+  --color-container: hsl(0deg 0% 20%);
+  --color-text: hsl(0deg 0% 80%);
+  --color-text-secondary: hsl(0deg 0% 70%);
+  --color-text-tertiary: hsl(0deg 0% 60%);
+  --color-border: hsl(0deg 0% 18%);
+  --color-outline: hsl(0deg 0% 30%);
+  --color-outline-hover: hsl(0deg 0% 35%);
+
+  --color-primary: hsl(var(--accent-hue) 80% 70%);
+  --color-primary-ring: hsl(var(--accent-hue) 80% 70% / 0.25);
+  --color-on-primary: hsl(var(--accent-hue) 100% 10%);
+
+  --color-danger: hsl(0deg 90% 63%);
+  --color-on-danger: hsl(0deg 100% 10%);
+  --color-danger-container: hsl(0deg 40% 18%);
+  --color-on-danger-container: hsl(0deg 100% 95%);
+
+  --border-radius: 0.5rem;
+  --border-radius-lg: 1rem;
+
+  --font-family-ui: system-ui, sans-serif;
+
+  --font-body-size: 1rem;
+  --font-body-line-height: 1.5;
+  --font-xs-size: 0.75rem;
+  --font-xs-line-height: 1.5;
+  --font-sm-size: 0.875rem;
+  --font-sm-line-height: 1.5;
+  --font-lg-size: 1.25rem;
+  --font-lg-line-height: 1.2;
+
+  --field-background-color: var(--color-surface-secondary);
+  --field-outline-color: var(--color-outline);
+  --field-hovered-outline-color: var(--color-outline-hover);
+  --field-hovered-background-color: var(--color-surface-tertiary);
+  --field-focused-outline-color: var(--color-primary);
+  --field-focused-ring: var(--color-primary-ring);
+
+  --button-background-color: var(--color-container);
+  --button-text-color: var(--color-text);
+  --button-overlay-strength: 0.05;
+
+  --button-primary-background-color: var(--color-primary);
+  --button-primary-text-color: var(--color-on-primary);
+  --button-primary-overlay-strength: 0.2;
+
+  --button-danger-background-color: var(--color-danger);
+  --button-danger-text-color: var(--color-on-danger);
+  --button-danger-overlay-strength: 0.1;
+
+  background-color: var(--color-base);
+  color: var(--color-text);
+  color-scheme: dark;
+
+  font-family: var(--font-family-ui);
+  font-size: var(--font-body-size);
+  line-height: var(--font-body-line-height);
+}
