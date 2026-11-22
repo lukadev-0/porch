@@ -1,10 +1,12 @@
 use std::sync::Arc;
 
+use aide::UseApi;
 use aide::axum::ApiRouter;
 use aide::axum::routing::{get_with, post_with};
 use aide::transform::TransformOperation;
 use axum::extract::{FromRef, Path, State};
 use axum::http::StatusCode;
+use axum::response::{IntoResponse, NoContent};
 use axum::{Extension, Json};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -12,7 +14,7 @@ use serde_json::json;
 use webauthn_rs::prelude as webauthn;
 
 use crate::authentication::{PasskeyAuthenticationId, StartPasskeyAuthenticationResponse};
-use crate::http::{ApiError, ApiResult, IntoApiError, UserTarget};
+use crate::http::{ApiError, ApiResult, IntoApiError, SetSessionId, UserTarget};
 use crate::identity::UserId;
 use crate::{http::AppStorage, service::Actor};
 
@@ -51,6 +53,7 @@ where
                 finish_passkey_authentication_docs,
             ),
         )
+        .api_route("/auth/sign-out", post_with(sign_out, sign_out_docs))
         .with_path_items(|path| path.tag("Authentication"))
 }
 
@@ -60,13 +63,13 @@ struct SelectUserPasskeys {
 }
 
 async fn start_passkey_registration(
-    State(storage): State<AppStorage>,
+    State(mut storage): State<AppStorage>,
     State(authentication): State<Arc<AuthenticationService>>,
     Extension(actor): Extension<Arc<Actor>>,
     Path(path): Path<SelectUserPasskeys>,
 ) -> ApiResult<Json<StartPasskeyRegistrationResponse>> {
     let response = authentication
-        .start_passkey_registration(&mut storage.get(), &actor, path.user_id.resolve(&actor))
+        .start_passkey_registration(&mut storage, &actor, path.user_id.resolve(&actor)?)
         .await?;
     Ok(Json(response))
 }
@@ -89,7 +92,7 @@ struct PasskeyCreationBody {
 }
 
 async fn finish_passkey_registration(
-    State(storage): State<AppStorage>,
+    State(mut storage): State<AppStorage>,
     State(authentication): State<Arc<AuthenticationService>>,
     Extension(actor): Extension<Arc<Actor>>,
     Path(path): Path<SelectUserPasskeys>,
@@ -97,9 +100,9 @@ async fn finish_passkey_registration(
 ) -> ApiResult<Json<Passkey>> {
     let response = authentication
         .finish_passkey_registration(
-            &mut storage.get(),
+            &mut storage,
             &actor,
-            path.user_id.resolve(&actor),
+            path.user_id.resolve(&actor)?,
             body.registration_id,
             body.credential,
             body.name,
@@ -121,13 +124,13 @@ struct UserPasskey {
 }
 
 async fn get_user_passkeys(
-    State(storage): State<AppStorage>,
+    State(mut storage): State<AppStorage>,
     State(authentication): State<Arc<AuthenticationService>>,
     Extension(actor): Extension<Arc<Actor>>,
     Path(path): Path<SelectUserPasskeys>,
 ) -> ApiResult<Json<Vec<UserPasskey>>> {
     let passkeys = authentication
-        .get_user_passkeys(&mut storage.get(), &actor, path.user_id.resolve(&actor))
+        .get_user_passkeys(&mut storage, &actor, path.user_id.resolve(&actor)?)
         .await?
         .into_iter()
         .map(|passkey| UserPasskey {
@@ -149,12 +152,12 @@ struct StartPasskeyAuthenticationBody {
 }
 
 async fn start_passkey_authentication(
-    State(storage): State<AppStorage>,
+    State(mut storage): State<AppStorage>,
     State(authentication): State<Arc<AuthenticationService>>,
     Json(body): Json<StartPasskeyAuthenticationBody>,
 ) -> ApiResult<Json<StartPasskeyAuthenticationResponse>> {
     let response = authentication
-        .start_passkey_authentication(&mut storage.get(), &body.username)
+        .start_passkey_authentication(&mut storage, &body.username)
         .await?;
     Ok(Json(response))
 }
@@ -180,18 +183,27 @@ struct AuthenticationResponse {
 }
 
 async fn finish_passkey_authentication(
-    State(storage): State<AppStorage>,
+    State(mut storage): State<AppStorage>,
     State(authentication): State<Arc<AuthenticationService>>,
     Json(body): Json<PasskeyAuthenticationBody>,
-) -> ApiResult<Json<AuthenticationResponse>> {
-    let user_id = authentication
-        .finish_passkey_authentication(&mut storage.get(), body.authentication_id, body.credential)
+) -> ApiResult<SetSessionId> {
+    let session = authentication
+        .finish_passkey_authentication(&mut storage, body.authentication_id, body.credential)
         .await
         .into_api_error(|error| ApiError::new(StatusCode::BAD_REQUEST, error.to_string()))?;
-    Ok(Json(AuthenticationResponse { user_id }))
+
+    Ok(SetSessionId(Some(session.id)))
 }
 
 fn finish_passkey_authentication_docs(op: TransformOperation) -> TransformOperation {
     op.id("finishPasskeyAuthentication")
         .summary("Finish passkey authentication")
+}
+
+async fn sign_out() -> ApiResult<SetSessionId> {
+    Ok(SetSessionId(None))
+}
+
+fn sign_out_docs(op: TransformOperation) -> TransformOperation {
+    op.id("signOut").summary("Sign out")
 }

@@ -2,7 +2,7 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { CreateUserData, CreateUserErrors, CreateUserResponses, FinishPasskeyAuthenticationData, FinishPasskeyAuthenticationErrors, FinishPasskeyAuthenticationResponses, FinishPasskeyRegistrationData, FinishPasskeyRegistrationErrors, FinishPasskeyRegistrationResponses, GetOpenapiJsonData, GetUserByIdData, GetUserByIdErrors, GetUserByIdResponses, GetUserPasskeysData, GetUserPasskeysErrors, GetUserPasskeysResponses, StartPasskeyAuthenticationData, StartPasskeyAuthenticationErrors, StartPasskeyAuthenticationResponses, StartPasskeyRegistrationData, StartPasskeyRegistrationErrors, StartPasskeyRegistrationResponses } from './types.gen';
+import type { CreateUserData, CreateUserErrors, CreateUserResponses, FinishPasskeyAuthenticationData, FinishPasskeyAuthenticationErrors, FinishPasskeyAuthenticationResponses, FinishPasskeyRegistrationData, FinishPasskeyRegistrationErrors, FinishPasskeyRegistrationResponses, GetOpenapiJsonData, GetUserByIdData, GetUserByIdErrors, GetUserByIdResponses, GetUserPasskeysData, GetUserPasskeysErrors, GetUserPasskeysResponses, SignOutData, SignOutErrors, SignOutResponses, StartPasskeyAuthenticationData, StartPasskeyAuthenticationErrors, StartPasskeyAuthenticationResponses, StartPasskeyRegistrationData, StartPasskeyRegistrationErrors, StartPasskeyRegistrationResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -82,5 +82,10 @@ export const finishPasskeyAuthentication = <ThrowOnError extends boolean = false
         ...options.headers
     }
 });
+
+/**
+ * Sign out
+ */
+export const signOut = <ThrowOnError extends boolean = false>(options?: Options<SignOutData, ThrowOnError>): RequestResult<SignOutResponses, SignOutErrors, ThrowOnError> => (options?.client ?? client).post<SignOutResponses, SignOutErrors, ThrowOnError>({ url: '/api/auth/sign-out', ...options });
 
 export const getOpenapiJson = <ThrowOnError extends boolean = false>(options?: Options<GetOpenapiJsonData, ThrowOnError>): RequestResult<unknown, unknown, ThrowOnError> => (options?.client ?? client).get<unknown, unknown, ThrowOnError>({ url: '/openapi.json', ...options });

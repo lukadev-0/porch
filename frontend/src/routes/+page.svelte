@@ -1,6 +1,11 @@
 <script lang="ts">
   import { finishPasskeyAuthentication, startPasskeyAuthentication } from "#lib/client/sdk.gen.ts";
+  import { refreshAll } from "$app/navigation";
   import type { EventHandler } from "svelte/elements";
+  import type { PageProps } from "./$types";
+  import { enhance } from "$app/forms";
+
+  const { data }: PageProps = $props();
 
   let authenticating = $state(false);
   let authenticationMessage = $state<string | undefined>();
@@ -30,9 +35,7 @@
 
     if (credential === null) throw "Could not get credential.";
 
-    const {
-      data: { user_id: userId },
-    } = await finishPasskeyAuthentication({
+    await finishPasskeyAuthentication({
       body: {
         authentication_id: authentication.authentication_id,
         credential,
@@ -40,7 +43,7 @@
       throwOnError: true,
     });
 
-    authenticationMessage = `Authenticated! (User ID: ${userId})`;
+    await refreshAll();
   };
 
   const handleAuthenticate: EventHandler<SubmitEvent, HTMLFormElement> = async (event) => {
@@ -65,7 +68,26 @@
   };
 </script>
 
+<h1>{data.user ? `Hello, ${data.user.display_name}!` : "Howdy, stranger!"}</h1>
 <p>To register passkeys, go to <a href="/user">the user</a>.</p>
+<button
+  type="submit"
+  onclick={async () => {
+    await fetch("/api/become-admin", { method: "POST" });
+    await refreshAll();
+  }}
+>
+  Become admin
+</button>
+<button
+  type="submit"
+  onclick={async () => {
+    await fetch("/api/auth/sign-out", { method: "POST" });
+    await refreshAll();
+  }}
+>
+  Sign out
+</button>
 <hr />
 <form onsubmit={handleAuthenticate}>
   <label>

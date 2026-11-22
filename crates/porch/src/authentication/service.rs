@@ -7,6 +7,10 @@ use serde_json::json;
 use webauthn_rs::Webauthn;
 use webauthn_rs::prelude as webauthn;
 
+use crate::authentication::Session;
+use crate::authentication::SessionId;
+use crate::authentication::SessionStorage;
+use crate::identity::User;
 use crate::identity::{IdentityService, UserId, UserStorage};
 use crate::service::{Actor, ServiceError, ServiceResult};
 use crate::storage::StorageError;
@@ -58,9 +62,7 @@ impl AuthenticationService {
         actor: &Actor,
         user_id: UserId,
     ) -> ServiceResult<StartPasskeyRegistrationResponse> {
-        actor
-            .can_manage_user(user_id)
-            .ok_or(ServiceError::AccessDenied)?;
+        actor.must_can_manage_user(user_id)?;
 
         let user = self
             .identity
@@ -115,17 +117,11 @@ impl AuthenticationService {
         credential: webauthn::RegisterPublicKeyCredential,
         name: String,
     ) -> ServiceResult<Passkey, webauthn::WebauthnError> {
-        actor
-            .can_manage_user(user_id)
-            .ok_or(ServiceError::AccessDenied)?;
+        actor.must_can_manage_user(user_id)?;
 
         let registration = storage
             .get_and_delete_passkey_registration(user_id, registration_id)
-            .await
-            .map_err(|error| match error {
-                StorageError::NoExist => ServiceError::NoExist,
-                StorageError::Other(error) => ServiceError::Other(error),
-            })?;
+            .await?;
 
         let data = self
             .webauthn
@@ -153,9 +149,7 @@ impl AuthenticationService {
         actor: &Actor,
         user_id: UserId,
     ) -> ServiceResult<Vec<Passkey>> {
-        actor
-            .can_manage_user(user_id)
-            .ok_or(ServiceError::AccessDenied)?;
+        actor.must_can_manage_user(user_id)?;
 
         let passkeys = storage
             .get_user_passkeys(user_id)
@@ -209,10 +203,10 @@ impl AuthenticationService {
 
     pub async fn finish_passkey_authentication(
         &self,
-        storage: &mut impl PasskeyStorage,
+        storage: &mut (impl PasskeyStorage + SessionStorage),
         authentication_id: PasskeyAuthenticationId,
         credential: webauthn::PublicKeyCredential,
-    ) -> ServiceResult<UserId, webauthn::WebauthnError> {
+    ) -> ServiceResult<Session, webauthn::WebauthnError> {
         let registration = storage
             .get_and_delete_passkey_authentication(authentication_id)
             .await
@@ -225,6 +219,30 @@ impl AuthenticationService {
             .finish_passkey_authentication(&credential, &registration.data)
             .map_err(ServiceError::Specific)?;
 
-        Ok(registration.user_id)
+        Ok(self
+            .create_session(storage, registration.user_id)
+            .await
+            .context("could not create session")?)
+    }
+
+    pub async fn create_session(
+        &self,
+        storage: &mut impl SessionStorage,
+        user_id: UserId,
+    ) -> ServiceResult<Session> {
+        let session = Session {
+            id: SessionId::generate(),
+            user_id,
+        };
+        storage.create_session(&session).await?;
+        Ok(session)
+    }
+
+    pub async fn get_session_user_by_id(
+        &self,
+        storage: &mut impl SessionStorage,
+        session_id: SessionId,
+    ) -> ServiceResult<(Session, User)> {
+        Ok(storage.get_session_user_by_id(session_id).await?)
     }
 }

@@ -29,14 +29,12 @@ where
 }
 
 async fn create_user(
-    State(storage): State<AppStorage>,
+    State(mut storage): State<AppStorage>,
     State(identity): State<Arc<IdentityService>>,
     Extension(actor): Extension<Arc<Actor>>,
     Json(body): Json<CreateUser>,
 ) -> ApiResult<Json<User>> {
-    let user = identity
-        .create_user(&mut storage.get(), &actor, body)
-        .await?;
+    let user = identity.create_user(&mut storage, &actor, body).await?;
     Ok(Json(user))
 }
 
@@ -50,13 +48,13 @@ struct SelectUser {
 }
 
 async fn get_user_by_id(
-    State(storage): State<AppStorage>,
+    State(mut storage): State<AppStorage>,
     State(identity): State<Arc<IdentityService>>,
     Extension(actor): Extension<Arc<Actor>>,
     Path(path): Path<SelectUser>,
 ) -> ApiResult<Json<User>> {
     let user = identity
-        .get_user_by_id(&mut storage.get(), &actor, path.user_id.resolve(&actor))
+        .get_user_by_id(&mut storage, &actor, path.user_id.resolve(&actor)?)
         .await?;
     Ok(Json(user))
 }

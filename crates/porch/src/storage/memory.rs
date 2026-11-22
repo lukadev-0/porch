@@ -6,9 +6,9 @@
 use std::collections::BTreeMap;
 use std::sync::{Arc, RwLock, RwLockReadGuard, RwLockWriteGuard};
 
-use crate::authentication::PasskeyStorage;
 use crate::authentication::{Passkey, PasskeyId, PasskeyRegistration, PasskeyRegistrationId};
 use crate::authentication::{PasskeyAuthentication, PasskeyAuthenticationId};
+use crate::authentication::{PasskeyStorage, Session, SessionId, SessionStorage};
 use crate::identity::{User, UserId, UserStorage};
 
 use super::{Storage, StorageError, StorageResult};
@@ -25,6 +25,7 @@ pub struct State {
     pub user_passkey_registrations:
         BTreeMap<UserId, BTreeMap<PasskeyRegistrationId, PasskeyRegistration>>,
     pub passkey_authentications: BTreeMap<PasskeyAuthenticationId, PasskeyAuthentication>,
+    pub sessions: BTreeMap<SessionId, Session>,
 }
 
 impl MemoryStorage {
@@ -146,5 +147,28 @@ impl PasskeyStorage for MemoryStorage {
             .passkey_authentications
             .remove(&authentication_id)
             .ok_or(StorageError::NoExist)
+    }
+}
+
+impl SessionStorage for MemoryStorage {
+    async fn create_session(&mut self, session: &Session) -> StorageResult<()> {
+        self.write().sessions.insert(session.id, session.clone());
+        Ok(())
+    }
+
+    async fn get_session_user_by_id(
+        &mut self,
+        session_id: SessionId,
+    ) -> StorageResult<(Session, User)> {
+        let state = self.read();
+        let session = state
+            .sessions
+            .get(&session_id)
+            .ok_or(StorageError::NoExist)?;
+        let user = state
+            .users
+            .get(&session.user_id)
+            .ok_or(StorageError::NoExist)?;
+        Ok((session.clone(), user.clone()))
     }
 }

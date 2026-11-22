@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use axum::extract::FromRef;
 
-use crate::authentication::{AuthenticationService, PasskeyStorage};
+use crate::authentication::{AuthenticationService, PasskeyStorage, SessionStorage};
 use crate::identity::{IdentityService, UserStorage};
 use crate::storage::memory::MemoryStorage;
 
@@ -13,13 +13,4 @@ pub struct AppState {
     pub authentication: Arc<AuthenticationService>,
 }
 
-#[derive(Clone, Default)]
-pub struct AppStorage {
-    storage: MemoryStorage,
-}
-
-impl AppStorage {
-    pub fn get(&self) -> impl UserStorage + PasskeyStorage {
-        self.storage.clone()
-    }
-}
+pub type AppStorage = MemoryStorage;

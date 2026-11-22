@@ -7,6 +7,7 @@ edition = "2024"
 aide = { version = "0.15.1", features = ["axum", "axum-json"] }
 anyhow = "1.0.104"
 axum = { version = "0.8.9", features = ["macros"] }
+axum-extra = { version = "0.12.6", features = ["cookie"] }
 base64 = "0.23.1"
 bytes = "1.12.1"
 getrandom = "0.4.3"
@@ -15,6 +16,7 @@ schemars = { version = "0.9.0", features = ["uuid1"] }
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = "1.0.154"
 thiserror = "2.0.21"
+time = "0.3.55"
 tokio = { version = "1.54.1", features = ["full"] }
 tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
 uuid = { version = "1.29.2", features = ["serde", "v7"] }

@@ -1,11 +1,13 @@
 use thiserror::Error;
-use uuid::uuid;
 
-use crate::identity::UserId;
+use crate::identity::{User, UserId};
+use crate::storage::StorageError;
 
 #[derive(Debug, Error)]
 pub enum ServiceError<E = !> {
-    #[error("access denied")]
+    #[error("authentication required")]
+    Unauthenticated,
+    #[error("user does not have the required permissions")]
     AccessDenied,
     #[error("target resource does not exist")]
     NoExist,
@@ -17,32 +19,63 @@ pub enum ServiceError<E = !> {
 
 pub type ServiceResult<T, E = !> = Result<T, ServiceError<E>>;
 
+impl<E> From<StorageError> for ServiceError<E> {
+    fn from(value: StorageError) -> Self {
+        match value {
+            StorageError::NoExist => ServiceError::NoExist,
+            error => ServiceError::Other(error.into()),
+        }
+    }
+}
+
+impl<E> From<Unauthorized> for ServiceError<E> {
+    fn from(value: Unauthorized) -> Self {
+        match value {
+            Unauthorized::Unauthenticated => Self::Unauthenticated,
+            Unauthorized::AccessDenied => Self::AccessDenied,
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct Actor {
-    user_id: UserId,
-    is_admin: bool,
+    user: Option<User>,
 }
 
 impl Actor {
-    pub const DUMMY_USER: Self = Self {
-        user_id: UserId(uuid!("014c155d-a180-7974-89bb-0def4dc42c43")),
-        is_admin: false,
-    };
+    pub const UNAUTHENTICATED: Self = Self { user: None };
 
-    pub const DUMMY_ADMIN: Self = Self {
-        user_id: UserId(uuid!("017f1e83-5d80-7e02-b95d-e69f40f1166d")),
-        is_admin: true,
-    };
-
-    pub fn user_id(&self) -> UserId {
-        self.user_id
+    pub fn user(&self) -> Result<&User, Unauthorized> {
+        self.authorize(|_| true)
     }
 
-    pub fn is_admin(&self) -> bool {
-        self.is_admin
+    pub fn user_id(&self) -> Result<UserId, Unauthorized> {
+        self.user().map(|user| user.id)
     }
 
-    pub fn can_manage_user(&self, user_id: UserId) -> bool {
-        self.is_admin() || self.user_id() == user_id
+    pub fn authorize(&self, f: impl FnOnce(&User) -> bool) -> Result<&User, Unauthorized> {
+        match &self.user {
+            None => Err(Unauthorized::Unauthenticated),
+            Some(user) => f(user).then_some(user).ok_or(Unauthorized::AccessDenied),
+        }
+    }
+
+    pub fn must_be_admin(&self) -> Result<&User, Unauthorized> {
+        self.authorize(|user| user.is_admin)
+    }
+
+    pub fn must_can_manage_user(&self, user_id: UserId) -> Result<&User, Unauthorized> {
+        self.authorize(|user| user.id == user_id || user.is_admin)
+    }
+}
+
+pub enum Unauthorized {
+    Unauthenticated,
+    AccessDenied,
+}
+
+impl From<User> for Actor {
+    fn from(value: User) -> Self {
+        Self { user: Some(value) }
     }
 }

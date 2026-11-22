@@ -8,10 +8,6 @@ export type ApiErrorResponse = {
     message: string;
 };
 
-export type AuthenticationResponse = {
-    user_id: string;
-};
-
 export type CreateUser = {
     display_name: string;
     name: string;
@@ -88,6 +84,7 @@ export type StartPasskeyRegistrationResponse = {
 export type User = {
     display_name: string;
     id: string;
+    is_admin: boolean;
     name: string;
 };
 
@@ -109,6 +106,8 @@ export type CreateUserData = {
 };
 
 export type CreateUserErrors = {
+    401: ApiErrorResponse;
+    403: ApiErrorResponse;
     500: ApiErrorResponse;
 };
 
@@ -130,6 +129,8 @@ export type GetUserByIdData = {
 };
 
 export type GetUserByIdErrors = {
+    401: ApiErrorResponse;
+    403: ApiErrorResponse;
     500: ApiErrorResponse;
 };
 
@@ -151,6 +152,8 @@ export type StartPasskeyRegistrationData = {
 };
 
 export type StartPasskeyRegistrationErrors = {
+    401: ApiErrorResponse;
+    403: ApiErrorResponse;
     500: ApiErrorResponse;
 };
 
@@ -172,6 +175,8 @@ export type GetUserPasskeysData = {
 };
 
 export type GetUserPasskeysErrors = {
+    401: ApiErrorResponse;
+    403: ApiErrorResponse;
     500: ApiErrorResponse;
 };
 
@@ -193,6 +198,8 @@ export type FinishPasskeyRegistrationData = {
 };
 
 export type FinishPasskeyRegistrationErrors = {
+    401: ApiErrorResponse;
+    403: ApiErrorResponse;
     500: ApiErrorResponse;
 };
 
@@ -212,6 +219,8 @@ export type StartPasskeyAuthenticationData = {
 };
 
 export type StartPasskeyAuthenticationErrors = {
+    401: ApiErrorResponse;
+    403: ApiErrorResponse;
     500: ApiErrorResponse;
 };
 
@@ -231,16 +240,39 @@ export type FinishPasskeyAuthenticationData = {
 };
 
 export type FinishPasskeyAuthenticationErrors = {
+    401: ApiErrorResponse;
+    403: ApiErrorResponse;
     500: ApiErrorResponse;
 };
 
 export type FinishPasskeyAuthenticationError = FinishPasskeyAuthenticationErrors[keyof FinishPasskeyAuthenticationErrors];
 
 export type FinishPasskeyAuthenticationResponses = {
-    200: AuthenticationResponse;
+    204: void;
 };
 
 export type FinishPasskeyAuthenticationResponse = FinishPasskeyAuthenticationResponses[keyof FinishPasskeyAuthenticationResponses];
+
+export type SignOutData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/auth/sign-out';
+};
+
+export type SignOutErrors = {
+    401: ApiErrorResponse;
+    403: ApiErrorResponse;
+    500: ApiErrorResponse;
+};
+
+export type SignOutError = SignOutErrors[keyof SignOutErrors];
+
+export type SignOutResponses = {
+    204: void;
+};
+
+export type SignOutResponse = SignOutResponses[keyof SignOutResponses];
 
 export type GetOpenapiJsonData = {
     body?: never;

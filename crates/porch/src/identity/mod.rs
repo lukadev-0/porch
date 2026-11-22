@@ -22,6 +22,7 @@ pub struct User {
     pub id: UserId,
     pub name: String,
     pub display_name: String,
+    pub is_admin: bool,
 }
 
 pub trait UserStorage: Storage {

@@ -7,7 +7,7 @@ use axum::response::IntoResponse;
 use schemars::JsonSchema;
 use serde::Serialize;
 
-use crate::service::{ServiceError, ServiceResult};
+use crate::service::{ServiceError, ServiceResult, Unauthorized};
 
 pub struct ApiError {
     status: StatusCode,
@@ -18,10 +18,27 @@ pub struct ApiError {
 pub type ApiResult<T> = Result<T, ApiError>;
 
 impl ApiError {
+    pub const UNAUTHENTICATED: Self =
+        Self::new_const(StatusCode::UNAUTHORIZED, "Authentication required.");
+    pub const ACCESS_DENIED: Self = Self::new_const(
+        StatusCode::FORBIDDEN,
+        "Insufficient permissions to perform this action.",
+    );
+    pub const NO_EXIST: Self =
+        Self::new_const(StatusCode::NOT_FOUND, "The target resource does not exist.");
+
     pub fn new(status: StatusCode, message: impl Into<Cow<'static, str>>) -> Self {
         Self {
             status,
             message: message.into(),
+            source: None,
+        }
+    }
+
+    pub const fn new_const(status: StatusCode, message: &'static str) -> Self {
+        Self {
+            status,
+            message: Cow::Borrowed(message),
             source: None,
         }
     }
@@ -46,13 +63,9 @@ impl<E> IntoApiError<E> for ServiceError<E> {
     type Output = ApiError;
     fn into_api_error(self, f: impl FnOnce(E) -> ApiError) -> Self::Output {
         match self {
-            ServiceError::AccessDenied => ApiError::new(
-                StatusCode::FORBIDDEN,
-                "Insufficient permissions to perform this action.",
-            ),
-            ServiceError::NoExist => {
-                ApiError::new(StatusCode::NOT_FOUND, "The target resource does not exist.")
-            }
+            ServiceError::Unauthenticated => ApiError::UNAUTHENTICATED,
+            ServiceError::AccessDenied => ApiError::ACCESS_DENIED,
+            ServiceError::NoExist => ApiError::NO_EXIST,
             ServiceError::Specific(error) => f(error),
             ServiceError::Other(error) => error.into(),
         }
@@ -69,6 +82,15 @@ impl<T, E> IntoApiError<E> for ServiceResult<T, E> {
 impl From<ServiceError> for ApiError {
     fn from(value: ServiceError) -> Self {
         value.into_api_error(|_| unreachable!())
+    }
+}
+
+impl From<Unauthorized> for ApiError {
+    fn from(value: Unauthorized) -> Self {
+        match value {
+            Unauthorized::Unauthenticated => Self::UNAUTHENTICATED,
+            Unauthorized::AccessDenied => Self::ACCESS_DENIED,
+        }
     }
 }
 
@@ -102,9 +124,14 @@ impl OperationOutput for ApiError {
         ctx: &mut aide::generate::GenContext,
         operation: &mut aide::openapi::Operation,
     ) -> Vec<(Option<u16>, aide::openapi::Response)> {
-        vec![(
-            Some(500),
-            <Json<ApiErrorResponse>>::operation_response(ctx, operation).unwrap(),
-        )]
+        [500, 401, 403]
+            .into_iter()
+            .map(|status| {
+                (
+                    Some(status),
+                    <Json<ApiErrorResponse>>::operation_response(ctx, operation).unwrap(),
+                )
+            })
+            .collect()
     }
 }
