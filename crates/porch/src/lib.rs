@@ -94,7 +94,7 @@ pub async fn run() -> Result<()> {
         })
         .with_state(app_state);
 
-    let listener = TcpListener::bind("localhost:8080").await?;
+    let listener = TcpListener::bind("0.0.0.0:8080").await?;
     axum::serve(listener, router).await?;
 
     Ok(())
